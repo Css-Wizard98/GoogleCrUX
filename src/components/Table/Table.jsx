@@ -2,8 +2,8 @@ import React from 'react';
 import './Table.css';
 
 const Table = ({ data, headers }) => {
-  console.log(data)
-  console.log(headers)
+  // console.log(data)
+  // console.log(headers)
   if (!data || data.length === 0 || !headers || headers.length === 0) {
     return <div>No data available.</div>;
   }

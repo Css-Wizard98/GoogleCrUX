@@ -1,0 +1,11 @@
+.header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sleeping-modal{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

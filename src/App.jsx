@@ -12,7 +12,7 @@ function App() {
   const [showSleepModal, setShowSleepModal] = useState();
 
   useEffect(() => {
-    if(!origins.length) return;
+    // if(!origins.length) return;
     fetchCruxData(origins);
   }, [origins])
 

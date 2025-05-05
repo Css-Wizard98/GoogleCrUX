@@ -75,7 +75,7 @@ function App() {
     <div className="app-container">
       <div className='header'>
         <img
-          src="/public/chrome.png"
+          src="/chrome.png"
           style={{
             width: '33px',
             marginRight: '10px',
@@ -89,7 +89,7 @@ function App() {
       <Modal open={showSleepModal}>
           <div className='sleeping-modal'>
           <img
-          src="/public/sleeping.png"
+          src="/sleeping.png"
           style={{
             width: '33px',
             marginRight: '10px',

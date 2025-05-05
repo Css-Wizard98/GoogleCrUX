@@ -1,0 +1,34 @@
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.custom-table th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  border-bottom: 2px solid #ddd;
+  padding: 8px;
+}
+
+.custom-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  word-break: break-word;
+}
+
+@media (max-width: 600px) {
+  .table-container {
+    overflow-x: auto;
+  }
+
+  .custom-table {
+    width: 100%;
+  }
+}

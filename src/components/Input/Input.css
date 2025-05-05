@@ -1,0 +1,35 @@
+.input-container{
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-capsule {
+  display: flex;
+  padding: 2px 18px;
+  border: 1px solid grey;
+  border-radius: 30px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-capsule .close-icon {
+  color: black;
+  margin-left: 5px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.item-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.input-field{
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+}

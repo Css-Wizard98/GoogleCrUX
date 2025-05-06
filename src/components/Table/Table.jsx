@@ -5,8 +5,6 @@ import Typography from '@mui/material/Typography';
 import {capitalizeFirstLetter} from "../../utils/utils"
 
 const Table = ({ data, headers }) => {
-  // console.log(data)
-  // console.log(headers)
   if(!headers || headers.length === 0) return <></>
   if (!data || data.length === 0) {
     return <div>No data available.</div>;

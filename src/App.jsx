@@ -8,26 +8,30 @@ import toast from 'react-hot-toast';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
+import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import Filter from './components/Filter/Filter'
 import { filterOptionValueToLabel, filterOptions } from "./components/Filter/filterOptions"
+import Instruction from './components/Instruction/Instruction';
+import BorderTable from './components/BorderTable/BorderTable';
 
 function App() {
   const [origins, setorigins] = useState([]);
   const [cruxData, setCruxData] = useState({});
-  const [filterData, setfilterData] = useState({ metrics: [], threshold:{} , thresholdFilterOn: false })
+  const [filterData, setfilterData] = useState({ metrics: [], threshold: {}, thresholdFilterOn: false })
   const [showSleepModal, setShowSleepModal] = useState(false);
   const [showFilterModal, setshowFilterModal] = useState(false);
   const [loading, setloading] = useState(false);
+  const [showTable, setshowTable] = useState(true);
 
-  useEffect(()=>{
+  useEffect(() => {
     let obj = {};
     filterOptions.forEach(el => obj[el.value] = 0);
-    setfilterData((prev) => ({...prev,threshold:obj}))
-  },[])
+    setfilterData((prev) => ({ ...prev, threshold: obj }))
+  }, [])
 
   const fetchCruxData = async (origins, filterData) => {
-    if(!origins.length) return;
+    if (!origins.length) return;
 
     setloading(true)
     let promiseArr = origins.map(origin => {
@@ -71,17 +75,16 @@ function App() {
         Object.keys(tempData).forEach(metric => {
           if (filterData.threshold[metric] && filterData.threshold[metric] !== "") {
             Object.keys(tempData[metric]).forEach(key => {
-              if(tempData[metric][key] < Number(filterData.threshold[metric])){
+              if (tempData[metric][key] < Number(filterData.threshold[metric])) {
                 delete tempData[metric][key];
               }
             });
           }
-          if(Object.keys(tempData[metric]).length === 0){
+          if (Object.keys(tempData[metric]).length === 0) {
             delete tempData[metric];
           }
         });
       }
-      console.log(tempData)
       setCruxData(tempData);
       clearTimeout(timoutId);
       setShowSleepModal(false);
@@ -117,8 +120,7 @@ function App() {
       minWidth: '150px'
     }
   })
-  console.log("cruxData", cruxData)
-  console.log("headers", headers)
+
 
   return (
     <div className="app-container">
@@ -148,9 +150,14 @@ function App() {
               <FilterAlt />
             </Badge>
           </IconButton>
+          {!!Object.keys(cruxData).length && <IconButton onClick={() => { setshowTable(!showTable) }} aria-label="filter">
+            <SwapHorizIcon />
+          </IconButton>}
         </div>
       </div>
-      <Table headers={headers} data={[cruxData]} />
+      {showTable && <Table headers={headers} data={[cruxData]} />}
+      {!showTable && <BorderTable headers={headers} data={cruxData} />}
+
       <Modal open={showSleepModal}>
         <div className='sleeping-modal'>
           <img
@@ -168,14 +175,17 @@ function App() {
         <Filter
           filterData={filterData}
           onClose={setshowFilterModal}
-          onSubmit={(data) => { 
-            setfilterData(data); 
+          onSubmit={(data) => {
+            setfilterData(data);
             setshowFilterModal(false);
             fetchCruxData(origins, data)
           }}
           open={showFilterModal}
         />}
+
+      <Instruction />
     </div>
+
   );
 }
 

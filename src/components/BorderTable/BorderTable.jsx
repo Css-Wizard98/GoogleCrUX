@@ -10,7 +10,7 @@ const BorderTable = ({ headers, data }) => {
   }
 
   return (
-    <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+    <table style={{ borderCollapse: 'collapse', width: '100%',marginBottom:100 }}>
       <thead>
         <tr>
           <th style={{ border: '1px solid #ddd', padding: '18px', width: '50%', background: '#f0f0f0', fontWeight: 'bold' }}>Metrics</th>

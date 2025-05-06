@@ -5,39 +5,39 @@ import Table from './components/Table/Table';
 import Modal from './components/Modal/Modal'
 import axios from "axios"
 import toast from 'react-hot-toast';
+import IconButton from '@mui/material/IconButton';
+import Badge from '@mui/material/Badge';
+import Button from '@mui/material/Button';
+import FilterAlt from '@mui/icons-material/FilterAlt';
+import Filter from './components/Filter/Filter'
 
 function App() {
-  const [origins,setorigins] = useState([]);
+  const [origins, setorigins] = useState([]);
   const [cruxData, setCruxData] = useState([]);
-  const [showSleepModal, setShowSleepModal] = useState();
+  const [filterData, setfilterData] = useState([])
+  const [showSleepModal, setShowSleepModal] = useState(false);
+  const [showFilterModal, setshowFilterModal] = useState(false);
 
-  useEffect(() => {
-    // if(!origins.length) return;
-    fetchCruxData(origins);
-  }, [origins])
-
-  const fetchCruxData = async (origins) => {
-    let payload = {
-      "origin": "https://example.com",
-      "formFactor": "PHONE",
-      "metrics": [
-        "largest_contentful_paint",
-        "experimental_time_to_first_byte"
-      ]
-    }
-
+  const fetchCruxData = async (origins,filterData) => {
+    let promiseArr = origins.map(origin =>{
+      let payload = {
+        "origin": origin,
+        "metrics": [...filterData]
+      }
+      return axios.post(`https://googlecrux-be.onrender.com/getRecords`, payload)
+    })
+    
+    const timoutId = setTimeout(() => {
+      setShowSleepModal(true)
+    }, 3000)
     try {
-      const timoutId = setTimeout(() => {
-        setShowSleepModal(true)
-      }, 3000)
-      const response = await axios.post(`https://googlecrux-be.onrender.com/getRecords`, payload)
-      console.log("response->", response.data)
+      const response = await Promise.all(promiseArr);
       clearTimeout(timoutId);
       setShowSleepModal(false);
     } catch (err) {
-      if(err.response.data.details.error.message){
+      if (err.response.data.details.error.message) {
         toast.error(err.response.data.details.error.message)
-      }else{
+      } else {
         toast.error("Error in fetching data from google")
       }
       clearTimeout(timoutId);
@@ -59,8 +59,12 @@ function App() {
     return data;
   };
 
-  const handleClose = () => {
-    setShowSleepModal(false)
+  const handleSearch = () => {
+    if(!origins.length){
+      toast.error("Please Select at least one origin");
+      return;
+    }
+    fetchCruxData(origins,filterData);
   }
 
   const headers = [
@@ -84,21 +88,40 @@ function App() {
         />
         <h1>Google CrUX</h1>
       </div>
-      <Input />
+      <div className='seach-box'>
+        <Input onSelect={setorigins} validate={(value) => {
+          if (!value.startsWith("https://")) {
+            toast.error("Invalid URL")
+            return false;
+          }
+          return true;
+        }} />
+        <Button variant="contained" size="large" onClick={handleSearch}>Search</Button>
+        <IconButton onClick={() => { setshowFilterModal(true) }} aria-label="filter">
+          <Badge color="error" variant={filterData.length ? "dot" : "standard"} invisible={filterData.length == 0}>
+            <FilterAlt />
+          </Badge>
+        </IconButton>
+      </div>
       <Table headers={headers} data={dummyData} />
       <Modal open={showSleepModal}>
-          <div className='sleeping-modal'>
+        <div className='sleeping-modal'>
           <img
-          src="/sleeping.png"
-          style={{
-            width: '33px',
-            marginRight: '10px',
-            height: '33px'
-          }}
-        />
-        <p>We are waking up the server. Please wait...</p>
-            </div>
+            src="/sleeping.png"
+            style={{
+              width: '33px',
+              marginRight: '10px',
+              height: '33px'
+            }}
+          />
+          <p>We are waking up the server. Please wait...</p>
+        </div>
       </Modal>
+      <Filter
+        onClose={setshowFilterModal}
+        onSubmit={(e) => { setfilterData(e); setshowFilterModal(false) }}
+        open={showFilterModal}
+      />
     </div>
   );
 }

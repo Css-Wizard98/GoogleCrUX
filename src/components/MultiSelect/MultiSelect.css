@@ -1,0 +1,15 @@
+.multi-select-container {
+  width: 100%;
+}
+
+.multi-select-label {
+  margin-bottom: 8px;
+}
+
+.multi-select-input {
+  width: 100%;
+}
+
+.multi-select-chip {
+  margin: 2px;
+}

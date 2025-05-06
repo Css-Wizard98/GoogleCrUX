@@ -10,6 +10,7 @@ import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import Filter from './components/Filter/Filter'
+import {filterOptionValueToLabel} from "./components/Filter/filterOptions"
 
 function App() {
   const [origins, setorigins] = useState([]);
@@ -18,24 +19,50 @@ function App() {
   const [showSleepModal, setShowSleepModal] = useState(false);
   const [showFilterModal, setshowFilterModal] = useState(false);
 
-  const fetchCruxData = async (origins,filterData) => {
-    let promiseArr = origins.map(origin =>{
+  const fetchCruxData = async (origins, filterData) => {
+    let promiseArr = origins.map(origin => {
       let payload = {
         "origin": origin,
         "metrics": [...filterData]
       }
       return axios.post(`https://googlecrux-be.onrender.com/getRecords`, payload)
     })
-    
+
     const timoutId = setTimeout(() => {
       setShowSleepModal(true)
     }, 3000)
     try {
       const response = await Promise.all(promiseArr);
+      let count = response.length;
+      let tempData = {};
+      response.forEach(item => {
+        Object.keys(item?.data?.record?.metrics).forEach(data => {
+          if (tempData[data]) {
+            let obj1 = tempData[data];
+            let obj2 = item.data.record.metrics[data].percentiles || item.data.record.metrics[data].fractions;
+            tempData[data] = Object.keys(obj1).reduce((acc, key) => {
+              acc[key] = Number(obj1[key]) + Number(obj2[key]);
+              return acc;
+            }, {});
+          } else {
+            if (item.data.record.metrics[data].percentiles) {
+              tempData[data] = item.data.record.metrics[data].percentiles
+            } else tempData[data] = item.data.record.metrics[data].fractions
+          }
+        })
+      })
+      //calculate average
+      Object.keys(tempData).forEach(data => {
+        Object.keys(tempData[data]).forEach(key => {
+          tempData[data][key] = tempData[data][key] / count
+        })
+      })
+      console.log(tempData)
+      setCruxData(tempData);
       clearTimeout(timoutId);
       setShowSleepModal(false);
     } catch (err) {
-      if (err.response.data.details.error.message) {
+      if (err?.response?.data?.details?.error?.message) {
         toast.error(err.response.data.details.error.message)
       } else {
         toast.error("Error in fetching data from google")
@@ -60,19 +87,23 @@ function App() {
   };
 
   const handleSearch = () => {
-    if(!origins.length){
+    if (!origins.length) {
       toast.error("Please Select at least one origin");
       return;
-    }
-    fetchCruxData(origins,filterData);
+    }handleSearch
+    fetchCruxData(origins, filterData);
   }
 
-  const headers = [
-    { key: 'name', label: 'Name', minWidth: '150px' },
-    { key: 'age', label: 'Age', minWidth: '80px' },
-    { key: 'email', label: 'Email', minWidth: '200px' },
-    { key: 'city', label: 'City', minWidth: '120px' },
-  ];
+  const headers = Object.keys(cruxData).map(el => {
+    return {
+      key: el,
+      label: filterOptionValueToLabel[el],
+      tooltip: el,
+      minWidth: '150px'
+    }
+  })
+  console.log("cruxData",cruxData)
+  console.log("headers",headers)
 
   const dummyData = generateDummyData();
   return (
@@ -96,14 +127,16 @@ function App() {
           }
           return true;
         }} />
-        <Button variant="contained" size="large" onClick={handleSearch}>Search</Button>
-        <IconButton onClick={() => { setshowFilterModal(true) }} aria-label="filter">
-          <Badge color="error" variant={filterData.length ? "dot" : "standard"} invisible={filterData.length == 0}>
-            <FilterAlt />
-          </Badge>
-        </IconButton>
+        <div className='seach-box-btn'>
+          <Button variant="contained" size="large" onClick={handleSearch}>Search</Button>
+          <IconButton onClick={() => { setshowFilterModal(true) }} aria-label="filter">
+            <Badge color="error" variant={filterData.length ? "dot" : "standard"} invisible={filterData.length == 0}>
+              <FilterAlt />
+            </Badge>
+          </IconButton>
+        </div>
       </div>
-      <Table headers={headers} data={dummyData} />
+      <Table headers={headers} data={[cruxData]} />
       <Modal open={showSleepModal}>
         <div className='sleeping-modal'>
           <img

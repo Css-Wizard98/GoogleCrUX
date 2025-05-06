@@ -20,7 +20,10 @@ const Input = ({validate, onSelect}) => {
   };
 
   const handleRemoveItem = (itemToRemove) => {
-    setData((prevData) => prevData.filter((item) => item !== itemToRemove));
+    let tempVal = [...data];
+    tempVal = tempVal.filter((item) => item !== itemToRemove)
+    setData(tempVal);
+    if(onSelect) onSelect(tempVal)
   };
   return (
     <div className="input-container">

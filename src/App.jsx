@@ -30,6 +30,10 @@ function App() {
     setfilterData((prev) => ({ ...prev, threshold: obj }))
   }, [])
 
+  useEffect(() => {
+    if(!origins.length) setCruxData({});
+  }, [origins])
+
   const fetchCruxData = async (origins, filterData) => {
     if (!origins.length) return;
 

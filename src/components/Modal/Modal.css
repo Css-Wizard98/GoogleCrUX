@@ -1,7 +1,7 @@
 .title{
     padding: 0 20px;
 }
-.modal-content{
+.modal-body{
     position: absolute;
     top: 50%;
     left: 50%;
@@ -9,4 +9,14 @@
     width: 400px;
     background: white;
     box-shadow: 24;
+    padding: 10px;
+}
+
+.modal-footer{
+    /* margin-bottom: 10px; */
+}
+
+.modal-content{
+    max-height: 70vh;
+    overflow-y: auto;
 }

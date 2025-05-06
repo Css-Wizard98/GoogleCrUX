@@ -31,7 +31,7 @@ const Input = ({validate, onSelect}) => {
         <TextField
           inputRef={INPUT}
           id="outlined-search"
-          label="Search field"
+          label="Search field(Press Enter)"
           type="search"
           fullWidth
           onKeyDown={handleEnterPress}

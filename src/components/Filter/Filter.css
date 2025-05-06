@@ -1,0 +1,13 @@
+.threshold-row{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.threshold-row label{
+    margin-bottom: 3px;
+}
+
+.threshold-row input{
+    height: 25px;
+    outline: none;
+}

@@ -10,20 +10,30 @@ import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import Filter from './components/Filter/Filter'
-import {filterOptionValueToLabel} from "./components/Filter/filterOptions"
+import { filterOptionValueToLabel, filterOptions } from "./components/Filter/filterOptions"
 
 function App() {
   const [origins, setorigins] = useState([]);
   const [cruxData, setCruxData] = useState([]);
-  const [filterData, setfilterData] = useState([])
+  const [filterData, setfilterData] = useState({ metrics: [], threshold:{} , thresholdFilterOn: false })
   const [showSleepModal, setShowSleepModal] = useState(false);
   const [showFilterModal, setshowFilterModal] = useState(false);
+  const [loading, setloading] = useState(false);
+
+  useEffect(()=>{
+    let obj = {};
+    filterOptions.forEach(el => obj[el.value] = 0);
+    setfilterData((prev) => ({...prev,threshold:obj}))
+  },[])
 
   const fetchCruxData = async (origins, filterData) => {
+    if(!origins.length) return;
+    
+    setloading(true)
     let promiseArr = origins.map(origin => {
       let payload = {
         "origin": origin,
-        "metrics": [...filterData]
+        "metrics": [...filterData.metrics]
       }
       return axios.post(`https://googlecrux-be.onrender.com/getRecords`, payload)
     })
@@ -57,10 +67,25 @@ function App() {
           tempData[data][key] = tempData[data][key] / count
         })
       })
+      if (filterData.thresholdFilterOn) {
+        Object.keys(tempData).forEach(metric => {
+          if (filterData.threshold[metric] && filterData.threshold[metric] !== "") {
+            Object.keys(tempData[metric]).forEach(key => {
+              if(tempData[metric][key] < Number(filterData.threshold[metric])){
+                delete tempData[metric][key];
+              }
+            });
+          }
+          if(Object.keys(tempData[metric]).length === 0){
+            delete tempData[metric];
+          }
+        });
+      }
       console.log(tempData)
       setCruxData(tempData);
       clearTimeout(timoutId);
       setShowSleepModal(false);
+      setloading(false)
     } catch (err) {
       if (err?.response?.data?.details?.error?.message) {
         toast.error(err.response.data.details.error.message)
@@ -69,28 +94,17 @@ function App() {
       }
       clearTimeout(timoutId);
       setShowSleepModal(false);
+      setloading(false)
     }
 
   }
-
-  const generateDummyData = () => {
-    const data = [];
-    for (let i = 1; i <= 5; i++) {
-      data.push({
-        name: `Name ${i}`,
-        age: 20 + i,
-        email: `email${i}@example.com`,
-        city: `City ${i}`,
-      });
-    }
-    return data;
-  };
 
   const handleSearch = () => {
     if (!origins.length) {
       toast.error("Please Select at least one origin");
       return;
-    }handleSearch
+    }
+    setloading(true);
     fetchCruxData(origins, filterData);
   }
 
@@ -102,10 +116,9 @@ function App() {
       minWidth: '150px'
     }
   })
-  console.log("cruxData",cruxData)
-  console.log("headers",headers)
+  console.log("cruxData", cruxData)
+  console.log("headers", headers)
 
-  const dummyData = generateDummyData();
   return (
     <div className="app-container">
       <div className='header'>
@@ -128,9 +141,9 @@ function App() {
           return true;
         }} />
         <div className='seach-box-btn'>
-          <Button variant="contained" size="large" onClick={handleSearch}>Search</Button>
+          <Button disabled={loading} variant="contained" size="large" onClick={handleSearch}>{loading ? 'Loading...' : 'Search'}</Button>
           <IconButton onClick={() => { setshowFilterModal(true) }} aria-label="filter">
-            <Badge color="error" variant={filterData.length ? "dot" : "standard"} invisible={filterData.length == 0}>
+            <Badge color="error" variant={(filterData.metrics.length || filterData.thresholdFilterOn) ? "dot" : "standard"} invisible={filterData.length == 0}>
               <FilterAlt />
             </Badge>
           </IconButton>
@@ -150,11 +163,17 @@ function App() {
           <p>We are waking up the server. Please wait...</p>
         </div>
       </Modal>
-      <Filter
-        onClose={setshowFilterModal}
-        onSubmit={(e) => { setfilterData(e); setshowFilterModal(false) }}
-        open={showFilterModal}
-      />
+      {showFilterModal &&
+        <Filter
+          filterData={filterData}
+          onClose={setshowFilterModal}
+          onSubmit={(data) => { 
+            setfilterData(data); 
+            setshowFilterModal(false);
+            fetchCruxData(origins, data)
+          }}
+          open={showFilterModal}
+        />}
     </div>
   );
 }

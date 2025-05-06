@@ -14,7 +14,7 @@ import { filterOptionValueToLabel, filterOptions } from "./components/Filter/fil
 
 function App() {
   const [origins, setorigins] = useState([]);
-  const [cruxData, setCruxData] = useState([]);
+  const [cruxData, setCruxData] = useState({});
   const [filterData, setfilterData] = useState({ metrics: [], threshold:{} , thresholdFilterOn: false })
   const [showSleepModal, setShowSleepModal] = useState(false);
   const [showFilterModal, setshowFilterModal] = useState(false);
@@ -28,7 +28,7 @@ function App() {
 
   const fetchCruxData = async (origins, filterData) => {
     if(!origins.length) return;
-    
+
     setloading(true)
     let promiseArr = origins.map(origin => {
       let payload = {
@@ -92,6 +92,7 @@ function App() {
       } else {
         toast.error("Error in fetching data from google")
       }
+      setCruxData({});
       clearTimeout(timoutId);
       setShowSleepModal(false);
       setloading(false)

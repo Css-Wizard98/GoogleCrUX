@@ -8,12 +8,10 @@ import toast from 'react-hot-toast';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Button from '@mui/material/Button';
-import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import FilterAlt from '@mui/icons-material/FilterAlt';
 import Filter from './components/Filter/Filter'
-import { filterOptionValueToLabel, filterOptions } from "./components/Filter/filterOptions"
+import {  filterOptions } from "./components/Filter/filterOptions"
 import Instruction from './components/Instruction/Instruction';
-import BorderTable from './components/BorderTable/BorderTable';
 
 function App() {
   const [origins, setorigins] = useState([]);

@@ -33,6 +33,9 @@ const Table = ({ data }) => {
       })
       setTableData([...data]);
       setHeaders(tempHeader)
+    }else{
+      setHeaders([])
+      setTableData([])
     }
   },[data])
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Modal from '../Modal/Modal';
+import CloseIcon from '@mui/icons-material/Close';
 import Button from '@mui/material/Button';
 import MultiSelect from '../MultiSelect/MultiSelect';
 import Box from '@mui/material/Box';
@@ -19,8 +20,14 @@ const Filter = ({ onClose, onSubmit, open, filterData }) => {
       setThresholdValues({...thresholdValues,[type]:Number(value)})
     }
   }
+
   return (
-    <Modal open={open} onClose={onClose} title="Select Filter" action={
+    <Modal open={open} onClose={onClose} title={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent:'space-between'}}>
+            <span>Select Filter</span>
+            <CloseIcon onClick={onClose} style={{ cursor: 'pointer' }} />
+        </div>
+    } action={
       <div
         style={{
           marginTop: "20px",
@@ -29,8 +36,9 @@ const Filter = ({ onClose, onSubmit, open, filterData }) => {
           justifyContent: "flex-end",
         }}
       >
-        <Button variant="outlined" onClick={() => onClose(false)}>
-          Cancel
+       
+        <Button disabled={!filterData.metrics.length && !filterData.thresholdFilterOn } variant="outlined" onClick={() => onSubmit({ metrics: [], threshold: {}, thresholdFilterOn: false })}>
+          Reset
         </Button>
         <Button variant="contained" color="primary" onClick={() => {
           let thresholdFilterOn = false;
@@ -46,7 +54,7 @@ const Filter = ({ onClose, onSubmit, open, filterData }) => {
           Apply
         </Button>
       </div>
-    }>
+    } >
       <Box sx={{ padding: '20px', backgroundColor: 'white' }}>
         <MultiSelect
           options={filterOptions}

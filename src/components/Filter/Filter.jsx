@@ -8,12 +8,10 @@ import './Filter.css'
 
 
 const Filter = ({ onClose, onSubmit, open, filterData }) => {
-  console.log("filterData",filterData)
   const [selectedOptions, setSelectedOptions] = useState([...filterData.metrics]);
   const [thresholdValues, setThresholdValues] = useState({...filterData.threshold});
 
   const handleThresholdUpdate = (value,type) => {
-    console.log(typeof(value))
     value = +value
     if(value<=0){
       setThresholdValues({...thresholdValues,[type]:0})
@@ -21,7 +19,6 @@ const Filter = ({ onClose, onSubmit, open, filterData }) => {
       setThresholdValues({...thresholdValues,[type]:Number(value)})
     }
   }
-  console.log("thresholdValues",thresholdValues)
   return (
     <Modal open={open} onClose={onClose} title="Select Filter" action={
       <div
@@ -42,7 +39,6 @@ const Filter = ({ onClose, onSubmit, open, filterData }) => {
               thresholdFilterOn = true;
             }
           })
-          console.log("thresholdFilterOn",thresholdFilterOn)
           onSubmit({
             metrics: selectedOptions, threshold: thresholdValues, thresholdFilterOn
           })

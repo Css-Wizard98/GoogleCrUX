@@ -22,7 +22,7 @@ function App() {
   const [showSleepModal, setShowSleepModal] = useState(false);
   const [showFilterModal, setshowFilterModal] = useState(false);
   const [loading, setloading] = useState(false);
-  const [showTable, setshowTable] = useState(true);
+  // const [showTable, setshowTable] = useState(true);
 
   useEffect(() => {
     let obj = {};
@@ -31,7 +31,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if(!origins.length) setCruxData({});
+    if (!origins.length) setCruxData({});
   }, [origins])
 
   const fetchCruxData = async (origins, filterData) => {
@@ -54,42 +54,31 @@ function App() {
       let count = response.length;
       let tempData = {};
       response.forEach(item => {
-        Object.keys(item?.data?.record?.metrics).forEach(data => {
-          if (tempData[data]) {
-            let obj1 = tempData[data];
-            let obj2 = item.data.record.metrics[data].percentiles || item.data.record.metrics[data].fractions;
-            tempData[data] = Object.keys(obj1).reduce((acc, key) => {
-              acc[key] = Number(obj1[key]) + Number(obj2[key]);
-              return acc;
-            }, {});
-          } else {
-            if (item.data.record.metrics[data].percentiles) {
-              tempData[data] = item.data.record.metrics[data].percentiles
-            } else tempData[data] = item.data.record.metrics[data].fractions
-          }
-        })
+        if (!tempData[item?.data?.record?.key?.origin]) tempData[item?.data?.record?.key?.origin] = {};
+        let key = item?.data?.record?.key?.origin;
+        Object.keys(item?.data?.record?.metrics).forEach(metricKey => {
+          tempData[key][metricKey] = item.data.record.metrics[metricKey].percentiles || item.data.record.metrics[metricKey].fractions
+        });
       })
-      //calculate average
-      Object.keys(tempData).forEach(data => {
-        Object.keys(tempData[data]).forEach(key => {
-          tempData[data][key] = tempData[data][key] / count
-        })
-      })
+      // filter response
       if (filterData.thresholdFilterOn) {
-        Object.keys(tempData).forEach(metric => {
-          if (filterData.threshold[metric] && filterData.threshold[metric] !== "") {
-            Object.keys(tempData[metric]).forEach(key => {
-              if (tempData[metric][key] < Number(filterData.threshold[metric])) {
-                delete tempData[metric][key];
-              }
-            });
-          }
-          if (Object.keys(tempData[metric]).length === 0) {
-            delete tempData[metric];
-          }
+        Object.keys(tempData).forEach(originKey => {
+          Object.keys(tempData[originKey]).forEach(metricKey => {
+            const metricData = tempData[originKey][metricKey];
+            const threshold = filterData.threshold[metricKey];
+
+            if (threshold > 0) {
+              Object.keys(metricData).forEach(data => {
+                if (metricData[data] < threshold) {
+                  delete metricData[data];
+                }
+              })
+              if (!Object.keys(metricData).length) delete tempData[originKey][metricKey];
+            }
+          });
         });
       }
-      setCruxData(tempData);
+      setCruxData(tempData)
       clearTimeout(timoutId);
       setShowSleepModal(false);
       setloading(false)
@@ -115,16 +104,6 @@ function App() {
     setloading(true);
     fetchCruxData(origins, filterData);
   }
-
-  const headers = Object.keys(cruxData).map(el => {
-    return {
-      key: el,
-      label: filterOptionValueToLabel[el],
-      tooltip: el,
-      minWidth: '150px'
-    }
-  })
-
 
   return (
     <div className="app-container">
@@ -154,15 +133,20 @@ function App() {
               <FilterAlt />
             </Badge>
           </IconButton>
-          {!!Object.keys(cruxData).length && <IconButton onClick={() => { setshowTable(!showTable) }} aria-label="filter">
+          {/* {!!Object.keys(cruxData).length && <IconButton onClick={() => { setshowTable(!showTable) }} aria-label="filter">
             <SwapHorizIcon />
-          </IconButton>}
+          </IconButton>} */}
         </div>
       </div>
-      {showTable && <Table headers={headers} data={[cruxData]} />}
-      {!showTable && <BorderTable headers={headers} data={cruxData} />}
+      <Table data={Object.keys(cruxData).map(data => {
+        return {
+          origin: data,
+          ...cruxData[data]
+        }
+      })} />
+      {/* {!showTable && <BorderTable headers={headers} data={cruxData} />} */}
 
-      <Modal open={showSleepModal}>
+      <Modal open={showSleepModal} onClose={() => { }}>
         <div className='sleeping-modal'>
           <img
             src="/sleeping.png"

@@ -160,7 +160,7 @@ function App() {
       {showFilterModal &&
         <Filter
           filterData={filterData}
-          onClose={setshowFilterModal}
+          onClose={() => setshowFilterModal(false)}
           onSubmit={(data) => {
             setfilterData(data);
             setshowFilterModal(false);
